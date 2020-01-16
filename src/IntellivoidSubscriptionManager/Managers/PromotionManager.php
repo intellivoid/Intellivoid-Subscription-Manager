@@ -5,13 +5,22 @@
 
 
     use IntellivoidSubscriptionManager\Abstracts\SearchMethods\SubscriptionPromotionSearchMethod;
+    use IntellivoidSubscriptionManager\Abstracts\SubscriptionPromotionStatus;
     use IntellivoidSubscriptionManager\Exceptions\DatabaseException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidCyclePriceException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidCyclePriceShareException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidFeatureException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidInitialPriceException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidInitialPriceShareException;
     use IntellivoidSubscriptionManager\Exceptions\InvalidSearchMethodException;
     use IntellivoidSubscriptionManager\Exceptions\InvalidSubscriptionPromotionNameException;
+    use IntellivoidSubscriptionManager\Exceptions\SubscriptionPromotionAlreadyExistsException;
     use IntellivoidSubscriptionManager\Exceptions\SubscriptionPromotionNotFoundException;
     use IntellivoidSubscriptionManager\IntellivoidSubscriptionManager;
+    use IntellivoidSubscriptionManager\Objects\Subscription\Feature;
     use IntellivoidSubscriptionManager\Objects\SubscriptionPromotion;
     use IntellivoidSubscriptionManager\Utilities\Converter;
+    use IntellivoidSubscriptionManager\Utilities\Hashing;
     use IntellivoidSubscriptionManager\Utilities\Validate;
     use msqg\QueryBuilder;
     use ZiProto\ZiProto;
@@ -37,7 +46,141 @@
             $this->intellivoidSubscriptionManager = $intellivoidSubscriptionManager;
         }
 
+        /**
+         * Creates a new subscription promotion
+         *
+         * @param int $subscription_plan_id
+         * @param string $promotion_code
+         * @param float $initial_price
+         * @param float $cycle_price
+         * @param int $affiliation_account_id
+         * @param float $affiliation_initial_share
+         * @param float $affiliation_cycle_share
+         * @param array $features
+         * @return SubscriptionPromotion
+         * @throws DatabaseException
+         * @throws InvalidCyclePriceException
+         * @throws InvalidCyclePriceShareException
+         * @throws InvalidFeatureException
+         * @throws InvalidInitialPriceException
+         * @throws InvalidInitialPriceShareException
+         * @throws InvalidSearchMethodException
+         * @throws InvalidSubscriptionPromotionNameException
+         * @throws SubscriptionPromotionAlreadyExistsException
+         * @throws SubscriptionPromotionNotFoundException
+         * @noinspection PhpUnused
+         */
+        public function createSubscriptionPromotion(int $subscription_plan_id, string $promotion_code, float $initial_price, float $cycle_price, int $affiliation_account_id, float $affiliation_initial_share, float $affiliation_cycle_share, array $features): SubscriptionPromotion
+        {
+            $promotion_code = Converter::subscriptionPromotionCode($promotion_code);
+            if(Validate::subscriptionPromotionCode($promotion_code) == false)
+            {
+                throw new InvalidSubscriptionPromotionNameException();
+            }
 
+            try
+            {
+                $this->getSubscriptionPromotion(SubscriptionPromotionSearchMethod::byPromotionCode, $promotion_code);
+                throw new SubscriptionPromotionAlreadyExistsException();
+            }
+            catch(SubscriptionPromotionNotFoundException $e)
+            {
+                unset($e);
+            }
+
+            if($initial_price < 0)
+            {
+                throw new InvalidInitialPriceException();
+            }
+
+            if($cycle_price < 0)
+            {
+                throw new InvalidCyclePriceException();
+            }
+
+            if($affiliation_account_id == 0)
+            {
+                $affiliation_initial_share = (float)0;
+                $affiliation_cycle_share = (float)0;
+            }
+            else
+            {
+                if($affiliation_cycle_share < 0)
+                {
+                    throw new InvalidCyclePriceShareException();
+                }
+
+                if($affiliation_cycle_share > $cycle_price)
+                {
+                    throw new InvalidCyclePriceShareException();
+                }
+
+                if($affiliation_initial_share < 0)
+                {
+                    throw new InvalidInitialPriceShareException();
+                }
+
+                if($affiliation_initial_share > $initial_price)
+                {
+                    throw new InvalidInitialPriceShareException();
+                }
+            }
+
+            $public_id = Hashing::SubscriptionPromotionPublicID((int)$subscription_plan_id, $promotion_code);
+            /** @var Feature $feature */
+            foreach($features as $feature)
+            {
+                if($feature->Name == null)
+                {
+                    throw new InvalidFeatureException();
+                }
+
+                if($feature->Value == null)
+                {
+                    throw new InvalidFeatureException();
+                }
+            }
+
+            $decoded_features = array();
+            /** @var Feature $feature */
+            foreach($features as $feature)
+            {
+                $decoded_features[] = $feature->toArray();
+            }
+
+            $decoded_features = ZiProto::encode($decoded_features);
+            $decoded_features = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($decoded_features);
+            $public_id = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($public_id);
+            $promotion_code = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($promotion_code);
+            $flags = ZiProto::encode([]);
+            $flags = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($flags);
+            $last_updated_timestamp = (int)time();
+            $created_timestamp = $last_updated_timestamp;
+
+            $Query = QueryBuilder::insert_into('subscription_promotions', array(
+                'public_id' => $public_id,
+                'promotion_code' => $promotion_code,
+                'subscription_plan_id' => (int)$subscription_plan_id,
+                'initial_price' => (float)$initial_price,
+                'cycle_price' => (float)$cycle_price,
+                'affiliation_account_id' => (int)$affiliation_account_id,
+                'affiliation_initial_share' => (float)$affiliation_initial_share,
+                'affiliation_cycle_share' => (float)$affiliation_cycle_share,
+                'features' => $decoded_features,
+                'status' => (int)SubscriptionPromotionStatus::Active,
+                'flags' => $flags,
+                'last_updated_timestamp' => $last_updated_timestamp,
+                'created_timestamp' => $created_timestamp
+            ));
+
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+            if($QueryResults == false)
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+
+            return $this->getSubscriptionPromotion(SubscriptionPromotionSearchMethod::byPublicId, $public_id);
+        }
 
         /**
          * Gets an existing Subscription Promotion from the database
