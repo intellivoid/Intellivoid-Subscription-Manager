@@ -4,6 +4,7 @@
     namespace IntellivoidSubscriptionManager\Objects;
 
 
+    use IntellivoidSubscriptionManager\Abstracts\SubscriptionPromotionStatus;
     use IntellivoidSubscriptionManager\Objects\Subscription\Feature;
 
     class SubscriptionPromotion
