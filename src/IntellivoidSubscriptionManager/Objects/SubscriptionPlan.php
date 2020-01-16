@@ -3,6 +3,8 @@
 
     namespace IntellivoidSubscriptionManager\Objects;
 
+    use IntellivoidSubscriptionManager\Objects\Subscription\Feature;
+
     /**
      * Class SubscriptionPlan
      * @package IntellivoidSubscriptionManager\Objects
