@@ -37,6 +37,8 @@
             $this->intellivoidSubscriptionManager = $intellivoidSubscriptionManager;
         }
 
+
+
         /**
          * Gets an existing Subscription Promotion from the database
          *
