@@ -25,4 +25,6 @@
         {
             $this->intellivoidSubscriptionManager = $intellivoidSubscriptionManager;
         }
+
+
     }
