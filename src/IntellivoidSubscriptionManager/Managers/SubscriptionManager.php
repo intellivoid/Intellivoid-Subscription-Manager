@@ -128,4 +128,28 @@
                 throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
             }
         }
+
+        /**
+         * Cancels an existing subscription
+         *
+         * @param Subscription $subscription
+         * @return bool
+         * @throws DatabaseException
+         */
+        public function cancelSubscription(Subscription $subscription)
+        {
+            $id = (int)$subscription->ID;
+
+            $Query = "DELETE FROM `subscriptions` WHERE id=$id";
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == true)
+            {
+                return true;
+            }
+            else
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+        }
     }
