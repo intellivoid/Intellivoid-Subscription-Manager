@@ -5,6 +5,9 @@
 
     use acm\acm;
     use Exception;
+    use IntellivoidSubscriptionManager\Managers\PlanManager;
+    use IntellivoidSubscriptionManager\Managers\PromotionManager;
+    use IntellivoidSubscriptionManager\Managers\SubscriptionManager;
     use mysqli;
 
     $LocalDirectory = __DIR__ . DIRECTORY_SEPARATOR;
@@ -74,6 +77,21 @@
         private $acm;
 
         /**
+         * @var SubscriptionManager
+         */
+        private $SubscriptionManager;
+
+        /**
+         * @var PlanManager
+         */
+        private $PlanManager;
+
+        /**
+         * @var PromotionManager
+         */
+        private $PromotionManager;
+
+        /**
          * Constructs IntellivoidSubscriptionManager
          *
          * IntellivoidSubscriptionManager constructor.
@@ -92,6 +110,9 @@
                 $this->DatabaseConfiguration['Port']
             );
 
+            $this->SubscriptionManager = new SubscriptionManager($this);
+            $this->PlanManager = new PlanManager($this);
+            $this->PromotionManager = new PromotionManager($this);
         }
 
         /**
@@ -116,5 +137,29 @@
         public function getAcm(): acm
         {
             return $this->acm;
+        }
+
+        /**
+         * @return SubscriptionManager
+         */
+        public function getSubscriptionManager(): SubscriptionManager
+        {
+            return $this->SubscriptionManager;
+        }
+
+        /**
+         * @return PlanManager
+         */
+        public function getPlanManager(): PlanManager
+        {
+            return $this->PlanManager;
+        }
+
+        /**
+         * @return PromotionManager
+         */
+        public function getPromotionManager(): PromotionManager
+        {
+            return $this->PromotionManager;
         }
     }
