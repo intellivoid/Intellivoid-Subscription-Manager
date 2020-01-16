@@ -4,7 +4,14 @@
     namespace IntellivoidSubscriptionManager\Managers;
 
 
+    use IntellivoidSubscriptionManager\Abstracts\SearchMethods\SubscriptionSearchMethod;
+    use IntellivoidSubscriptionManager\Exceptions\DatabaseException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidSearchMethodException;
+    use IntellivoidSubscriptionManager\Exceptions\SubscriptionNotFoundException;
     use IntellivoidSubscriptionManager\IntellivoidSubscriptionManager;
+    use IntellivoidSubscriptionManager\Objects\Subscription;
+    use msqg\QueryBuilder;
+    use ZiProto\ZiProto;
 
     /**
      * Class SubscriptionManager
@@ -24,5 +31,64 @@
         public function __construct(IntellivoidSubscriptionManager $intellivoidSubscriptionManager)
         {
             $this->intellivoidSubscriptionManager = $intellivoidSubscriptionManager;
+        }
+
+        /**
+         * Gets an existing subscription from the database
+         *
+         * @param string $search_method
+         * @param string $value
+         * @return Subscription
+         * @throws DatabaseException
+         * @throws InvalidSearchMethodException
+         * @throws SubscriptionNotFoundException
+         */
+        public function getSubscription(string $search_method, string $value): Subscription
+        {
+            switch($search_method)
+            {
+                case SubscriptionSearchMethod::byId:
+                    $search_method = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($search_method);
+                    $value = (int)$value;
+                    break;
+
+                case SubscriptionSearchMethod::byPublicId:
+                    $search_method = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($search_method);
+                    $value = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($value);
+                    break;
+
+                default:
+                    throw new InvalidSearchMethodException();
+            }
+
+            $Query = QueryBuilder::select('subscriptions', [
+                'id',
+                'public_id',
+                'account_id',
+                'subscription_plan_id',
+                'active',
+                'billing_cycle',
+                'next_billing_cycle',
+                'properties',
+                'created_timestamp',
+                'flags'
+            ], $search_method, $value);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == false)
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+            else
+            {
+                if($QueryResults->num_rows !== 1)
+                {
+                    throw new SubscriptionNotFoundException();
+                }
+
+                $Row = $QueryResults->fetch_array(MYSQLI_ASSOC);
+                $Row['flags'] = ZiProto::decode($Row['flags']);
+                return Subscription::fromArray($Row);
+            }
         }
     }
