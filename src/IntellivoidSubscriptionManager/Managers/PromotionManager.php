@@ -354,4 +354,32 @@
                 throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
             }
         }
+
+        /**
+         * Deletes an existing Subscription Promotion from the database
+         *
+         * @param SubscriptionPromotion $subscriptionPromotion
+         * @return bool
+         * @throws DatabaseException
+         * @throws InvalidSearchMethodException
+         * @throws InvalidSubscriptionPromotionNameException
+         * @throws SubscriptionPromotionNotFoundException
+         */
+        public function deleteSubscriptionPromotion(SubscriptionPromotion $subscriptionPromotion): bool
+        {
+            $this->getSubscriptionPromotion(SubscriptionPromotionSearchMethod::byId, $subscriptionPromotion->ID);
+            $id = (int)$subscriptionPromotion->ID;
+
+            $Query = "DELETE FROM `subscription_promotions` WHERE id=$id";
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == true)
+            {
+                return true;
+            }
+            else
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+        }
     }
