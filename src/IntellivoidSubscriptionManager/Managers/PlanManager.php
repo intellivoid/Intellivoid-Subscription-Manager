@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 
     namespace IntellivoidSubscriptionManager\Managers;
@@ -42,6 +42,7 @@
          * @throws DatabaseException
          * @throws InvalidSearchMethodException
          * @throws SubscriptionPlanNotFoundException
+         * @noinspection DuplicatedCode
          */
         public function getSubscriptionPlan(string $search_method, string $value): SubscriptionPlan
         {
@@ -75,6 +76,55 @@
                 'last_updated',
                 'created_timestamp'
             ], $search_method, $value);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == false)
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+            else
+            {
+                if($QueryResults->num_rows !== 1)
+                {
+                    throw new SubscriptionPlanNotFoundException();
+                }
+
+                $Row = $QueryResults->fetch_array(MYSQLI_ASSOC);
+                $Row['features'] = ZiProto::decode($Row['features']);
+                $Row['flags'] = ZiProto::decode($Row['flags']);
+                return SubscriptionPlan::fromArray($Row);
+            }
+        }
+
+        /**
+         * Fetches a Subscription Plan by a Plan Name
+         *
+         * @param int $application_id
+         * @param string $name
+         * @return SubscriptionPlan
+         * @throws DatabaseException
+         * @throws SubscriptionPlanNotFoundException
+         * @noinspection DuplicatedCode
+         */
+        public function getSubscriptionPlanByName(int $application_id, string $name): SubscriptionPlan
+        {
+            $application_id = (int)$application_id;
+            $name = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($name);
+
+            $Query = QueryBuilder::select('subscription_plans', [
+                'id',
+                'public_id',
+                'application_id',
+                'plan_name',
+                'features',
+                'initial_price',
+                'cycle_price',
+                'billing_cycle',
+                'status',
+                'flags',
+                'last_updated',
+                'created_timestamp'
+            ], 'application_id', $application_id . "' AND plan_name='$name");
             $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
 
             if($QueryResults == false)
