@@ -6,7 +6,7 @@
 
     /**
      * Class InvalidSearchMethodException
-     * @package IntellivoidAccounts\Exceptions
+     * @package IntellivoidSubscriptionManager\Exceptions
      */
     class InvalidSearchMethodException extends Exception
     {

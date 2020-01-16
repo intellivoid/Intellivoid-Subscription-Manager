@@ -8,7 +8,7 @@
 
     /**
      * Class SubscriptionPlanNotFoundException
-     * @package IntellivoidAccounts\Exceptions
+     * @package IntellivoidSubscriptionManager\Exceptions
      */
     class SubscriptionPlanNotFoundException extends Exception
     {
