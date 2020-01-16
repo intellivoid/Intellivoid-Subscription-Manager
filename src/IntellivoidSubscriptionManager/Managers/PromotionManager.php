@@ -257,4 +257,101 @@
                 return SubscriptionPromotion::fromArray($Row);
             }
         }
+
+        /**
+         * Updates an existing Subscription Promotion that's in the database
+         *
+         * @param SubscriptionPromotion $subscriptionPromotion
+         * @return bool
+         * @throws DatabaseException
+         * @throws InvalidCyclePriceShareException
+         * @throws InvalidInitialPriceShareException
+         * @throws InvalidSearchMethodException
+         * @throws InvalidSubscriptionPromotionNameException
+         * @throws SubscriptionPromotionNotFoundException
+         * @noinspection PhpUnused
+         */
+        public function updateSubscriptionPromotion(SubscriptionPromotion $subscriptionPromotion): bool
+        {
+            $this->getSubscriptionPromotion(SubscriptionPromotionSearchMethod::byId, $subscriptionPromotion->ID);
+
+            $promotion_code = Converter::subscriptionPromotionCode($subscriptionPromotion->PromotionCode);
+            if(Validate::subscriptionPromotionCode($subscriptionPromotion->PromotionCode) == false)
+            {
+                throw new InvalidSubscriptionPromotionNameException();
+            }
+
+            $promotion_code = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($promotion_code);
+            $public_id = Hashing::SubscriptionPromotionPublicID($subscriptionPromotion->SubscriptionPlanID, $promotion_code);
+            $initial_price = (float)$subscriptionPromotion->InitialPrice;
+            $cycle_price = (float)$subscriptionPromotion->CyclePrice;
+            $affiliation_account_id = (int)$subscriptionPromotion->AffiliationAccountID;
+            $affiliation_initial_share = (float)$subscriptionPromotion->AffiliationInitialShare;
+            $affiliation_cycle_share = (float)$subscriptionPromotion->AffiliationCycleShare;
+
+            if($subscriptionPromotion->AffiliationAccountID == 0)
+            {
+                $affiliation_initial_share = (float)0;
+                $affiliation_cycle_share = (float)0;
+            }
+            else
+            {
+                if($affiliation_cycle_share < 0)
+                {
+                    throw new InvalidCyclePriceShareException();
+                }
+
+                if($affiliation_cycle_share > $cycle_price)
+                {
+                    throw new InvalidCyclePriceShareException();
+                }
+
+                if($affiliation_initial_share < 0)
+                {
+                    throw new InvalidInitialPriceShareException();
+                }
+
+                if($affiliation_initial_share > $initial_price)
+                {
+                    throw new InvalidInitialPriceShareException();
+                }
+            }
+
+
+            $decoded_features = array();
+            /** @var Feature $feature */
+            foreach($subscriptionPromotion->Features as $feature)
+            {
+                $decoded_features[] = $feature->toArray();
+            }
+
+            $decoded_features = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string(ZiProto::encode($decoded_features));
+            $flags = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string(ZiProto::encode($subscriptionPromotion->Flags));
+            $last_updated_timestamp = (int)time();
+            $status = (int)$subscriptionPromotion->Status;
+
+            $Query = QueryBuilder::update('subscription_promotions', array(
+                'public_id' => $public_id,
+                'promotion_code' => $promotion_code,
+                'initial_price' => $initial_price,
+                'cycle_price' => $cycle_price,
+                'affiliation_account_id' => $affiliation_account_id,
+                'affiliation_initial_share' => $affiliation_initial_share,
+                'affiliation_cycle_share' => $affiliation_cycle_share,
+                'features' => $decoded_features,
+                'status' => $status,
+                'flags' => $flags,
+                'last_updated_timestamp' => $last_updated_timestamp
+            ), 'id', (int)$subscriptionPromotion->ID);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == true)
+            {
+                return true;
+            }
+            else
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+        }
     }
