@@ -130,6 +130,22 @@
         }
 
         /**
+         * Determines if the subscription requires billing
+         *
+         * @param Subscription $subscription
+         * @return bool
+         */
+        public function billingRequired(Subscription $subscription): bool
+        {
+            if($subscription->NextBillingCycle > (int)time())
+            {
+                return True;
+            }
+
+            return False;
+        }
+
+        /**
          * Cancels an existing subscription
          *
          * @param Subscription $subscription
