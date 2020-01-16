@@ -6,6 +6,9 @@
 
     use IntellivoidSubscriptionManager\Abstracts\SearchMethods\SubscriptionPlanSearchMethod;
     use IntellivoidSubscriptionManager\Exceptions\DatabaseException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidBillingCycleException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidCyclePriceException;
+    use IntellivoidSubscriptionManager\Exceptions\InvalidInitialPriceException;
     use IntellivoidSubscriptionManager\Exceptions\InvalidSearchMethodException;
     use IntellivoidSubscriptionManager\Exceptions\SubscriptionPlanNotFoundException;
     use IntellivoidSubscriptionManager\IntellivoidSubscriptionManager;
@@ -142,6 +145,65 @@
                 $Row['features'] = ZiProto::decode($Row['features']);
                 $Row['flags'] = ZiProto::decode($Row['flags']);
                 return SubscriptionPlan::fromArray($Row);
+            }
+        }
+
+        /**
+         * Updates an existing Subscription Plan
+         *
+         * @param SubscriptionPlan $subscriptionPlan
+         * @return bool
+         * @throws DatabaseException
+         * @throws InvalidBillingCycleException
+         * @throws InvalidCyclePriceException
+         * @throws InvalidInitialPriceException
+         */
+        public function updateSubscriptionPlan(SubscriptionPlan $subscriptionPlan): bool
+        {
+            $subscriptionPlanArray = $subscriptionPlan->toArray();
+
+            if((float)$subscriptionPlanArray['initial_price'] < 0)
+            {
+                throw new InvalidInitialPriceException();
+            }
+
+            if((float)$subscriptionPlanArray['cycle_price'] < 0)
+            {
+                throw new InvalidCyclePriceException();
+            }
+
+            if((int)$subscriptionPlanArray['billing_cycle'] < 0)
+            {
+                throw new InvalidBillingCycleException();
+            }
+
+            $features = ZiProto::encode($subscriptionPlanArray['features']);
+            $features = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($features);
+            $flags = ZiProto::encode($subscriptionPlanArray['flags']);
+            $flags = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($flags);
+            $last_updated = (int)time();
+            $billing_cycle = (int)$subscriptionPlanArray['billing_cycle'];
+            $initial_price = (float)$subscriptionPlanArray['initial_price'];
+            $cycle_price = (float)$subscriptionPlanArray['cycle_price'];
+            $status = (int)$subscriptionPlanArray['status'];
+
+            $Query = QueryBuilder::update('subscription_plans', array(
+                'features' => $features,
+                'flags' => $flags,
+                'initial_price' => $initial_price,
+                'cycle_price' => $cycle_price,
+                'billing_cycle' => $billing_cycle,
+                'status' => $status,
+                'last_updated' => $last_updated
+            ), 'id', (int)$subscriptionPlanArray['id']);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == true)
+            {              return true;
+            }
+            else
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
             }
         }
     }
