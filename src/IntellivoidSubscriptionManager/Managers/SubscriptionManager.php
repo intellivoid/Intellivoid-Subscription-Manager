@@ -91,4 +91,41 @@
                 return Subscription::fromArray($Row);
             }
         }
+
+        /**
+         * Updates an existing subscription to the database
+         *
+         * @param Subscription $subscription
+         * @return bool
+         * @throws DatabaseException
+         */
+        public function updateSubscription(Subscription $subscription): bool
+        {
+            $id = (int)$subscription->ID;
+            $active = (int)$subscription->Active;
+            $billing_cycle = (int)$subscription->BillingCycle;
+            $next_billing_cycle = (int)$subscription->NextBillingCycle;
+            $properties = ZiProto::encode($subscription->Properties->toArray());
+            $properties = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($properties);
+            $flags = ZiProto::encode($subscription->Flags);
+            $flags = $this->intellivoidSubscriptionManager->getDatabase()->real_escape_string($flags);
+
+            $Query = QueryBuilder::update('subscriptions',array(
+                'active' => $active,
+                'billing_cycle' => $billing_cycle,
+                'next_billing_cycle' => $next_billing_cycle,
+                'properties' => $properties,
+                'flags' => $flags
+            ), 'id', $id);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == true)
+            {
+                return true;
+            }
+            else
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+        }
     }
