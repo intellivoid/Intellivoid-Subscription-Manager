@@ -199,7 +199,8 @@
             $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
 
             if($QueryResults == true)
-            {              return true;
+            {
+                return true;
             }
             else
             {
