@@ -171,6 +171,50 @@
         }
 
         /**
+         * Gets subscriptions associated with an account ID
+         *
+         * @param int $account_id
+         * @return array
+         * @throws DatabaseException
+         */
+        public function getSubscriptionsByAccountID(int $account_id): array
+        {
+            $account_id = (int)$account_id;
+
+            $Query = QueryBuilder::select('subscriptions', [
+                'id',
+                'public_id',
+                'account_id',
+                'subscription_plan_id',
+                'active',
+                'billing_cycle',
+                'next_billing_cycle',
+                'properties',
+                'created_timestamp',
+                'flags'
+            ], 'account_id', $account_id);
+            $QueryResults = $this->intellivoidSubscriptionManager->getDatabase()->query($Query);
+
+            if($QueryResults == false)
+            {
+                throw new DatabaseException($Query, $this->intellivoidSubscriptionManager->getDatabase()->error);
+            }
+            else
+            {
+                $ResultsArray = [];
+
+                while($Row = $QueryResults->fetch_assoc())
+                {
+                    $Row['flags'] = ZiProto::decode($Row['flags']);
+                    $Row['properties'] = ZiProto::decode($Row['properties']);
+                    $ResultsArray[] = $Row;
+                }
+
+                return $ResultsArray;
+            }
+        }
+
+        /**
          * Determines if the Subscription Plan is associated with an account
          *
          * @param int $account_id
