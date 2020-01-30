@@ -42,7 +42,7 @@
                 {
                     $Results[$feature->Name] = $feature->Value;
                 }
-                
+
                 return $Results;
             }
 
@@ -72,6 +72,36 @@
                 }
 
                 $Results[$name] = $value;
+            }
+
+            return $Results;
+        }
+
+        /**
+         * Features to Multi-Dimensional array
+         *
+         * @param array $features
+         * @param bool $as_objects
+         * @return array
+         */
+        public static function featuresToMDA(array $features, bool $as_objects=True): array
+        {
+            $Results = array();
+
+            foreach($features as $name => $value)
+            {
+                $FeatureObject = new Feature();
+                $FeatureObject->Name = $name;
+                $FeatureObject->Value = $value;
+
+                if($as_objects)
+                {
+                    $Results[] = $FeatureObject;
+                }
+                else
+                {
+                    $Results[] = $FeatureObject->toArray();
+                }
             }
 
             return $Results;
