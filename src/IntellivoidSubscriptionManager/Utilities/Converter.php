@@ -73,5 +73,7 @@
 
                 $Results[$name] = $value;
             }
+
+            return $Results;
         }
     }
