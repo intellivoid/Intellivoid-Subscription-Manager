@@ -106,4 +106,51 @@
 
             return $Results;
         }
+
+        /**
+         * Validates the features from an array
+         *
+         * @param array $data
+         * @return bool
+         */
+        public static function validateFeatures(array $data): bool
+        {
+            foreach($data as $feature)
+            {
+                $name = null;
+                $value = null;
+
+                if(isset($feature['name']))
+                {
+                    $name = $feature['name'];
+                }
+
+                if(isset($feature['Name']))
+                {
+                    $name = $feature['Name'];
+                }
+
+                if(isset($feature['value']))
+                {
+                    $value = $feature['value'];
+                }
+
+                if(isset($feature['Value']))
+                {
+                    $value = $feature['Value'];
+                }
+
+                if(is_null($name))
+                {
+                    return false;
+                }
+
+                if(is_null($value))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
