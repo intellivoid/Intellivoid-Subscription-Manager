@@ -13,133 +13,42 @@
             {"package": "net.intellivoid.ziproto", "version": "latest", "required": true}
         ],
         "configuration": {
-            "autoload_method": "indexed",
+            "autoload_method": "static",
             "main": null,
             "post_installation": [],
             "pre_installation": []
         }
     },
     "components": [
-        {
-            "required": true,
-            "file": "Abstracts/SearchMethods/SubscriptionPlanSearchMethod.php"
-        },
-        {
-            "required": true,
-            "file": "Abstracts/SearchMethods/SubscriptionPromotionSearchMethod.php"
-        },
-        {
-            "required": true,
-            "file": "Abstracts/SearchMethods/SubscriptionSearchMethod.php"
-        },
-        {
-            "required": true,
-            "file": "Abstracts/SubscriptionPromotionStatus.php"
-        },
-        {
-            "required": true,
-            "file": "AutoConfig.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/DatabaseException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidBillingCycleException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidCyclePriceException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidCyclePriceShareException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidFeatureException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidInitialPriceException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidInitialPriceShareException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidSearchMethodException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/InvalidSubscriptionPromotionNameException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/SubscriptionNotFoundException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/SubscriptionPlanNotFoundException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/SubscriptionPromotionAlreadyExistsException.php"
-        },
-        {
-            "required": true,
-            "file": "Exceptions/SubscriptionPromotionNotFoundException.php"
-        },
-        {
-            "required": true,
-            "file": "IntellivoidSubscriptionManager.php"
-        },
-        {
-            "required": true,
-            "file": "Managers/PlanManager.php"
-        },
-        {
-            "required": true,
-            "file": "Managers/PromotionManager.php"
-        },
-        {
-            "required": true,
-            "file": "Managers/SubscriptionManager.php"
-        },
-        {
-            "required": true,
-            "file": "Objects/Subscription/Feature.php"
-        },
-        {
-            "required": true,
-            "file": "Objects/Subscription/Properties.php"
-        },
-        {
-            "required": true,
-            "file": "Objects/Subscription.php"
-        },
-        {
-            "required": true,
-            "file": "Objects/SubscriptionPlan.php"
-        },
-        {
-            "required": true,
-            "file": "Objects/SubscriptionPromotion.php"
-        },
-        {
-            "required": true,
-            "file": "Utilities/Converter.php"
-        },
-        {
-            "required": true,
-            "file": "Utilities/Hashing.php"
-        },
-        {
-            "required": true,
-            "file": "Utilities/Validate.php"
-        }
+        {"required": true, "file": "Abstracts/SearchMethods/SubscriptionPlanSearchMethod.php"},
+        {"required": true, "file": "Abstracts/SearchMethods/SubscriptionPromotionSearchMethod.php"},
+        {"required": true, "file": "Abstracts/SearchMethods/SubscriptionSearchMethod.php"},
+        {"required": true, "file": "Abstracts/SubscriptionPromotionStatus.php"},
+        {"required": true, "file": "Exceptions/DatabaseException.php"},
+        {"required": true, "file": "Exceptions/InvalidBillingCycleException.php"},
+        {"required": true, "file": "Exceptions/InvalidCyclePriceException.php"},
+        {"required": true, "file": "Exceptions/InvalidCyclePriceShareException.php"},
+        {"required": true, "file": "Exceptions/InvalidFeatureException.php"},
+        {"required": true, "file": "Exceptions/InvalidInitialPriceException.php"},
+        {"required": true, "file": "Exceptions/InvalidInitialPriceShareException.php"},
+        {"required": true, "file": "Exceptions/InvalidSearchMethodException.php"},
+        {"required": true, "file": "Exceptions/InvalidSubscriptionPromotionNameException.php"},
+        {"required": true, "file": "Exceptions/SubscriptionNotFoundException.php"},
+        {"required": true, "file": "Exceptions/SubscriptionPlanNotFoundException.php"},
+        {"required": true, "file": "Exceptions/SubscriptionPromotionAlreadyExistsException.php"},
+        {"required": true, "file": "Exceptions/SubscriptionPromotionNotFoundException.php"},
+        {"required": true, "file": "Managers/PlanManager.php"},
+        {"required": true, "file": "Managers/PromotionManager.php"},
+        {"required": true, "file": "Managers/SubscriptionManager.php"},
+        {"required": true, "file": "Managers/SubscriptionManager.php"},
+        {"required": true, "file": "Objects/Subscription/Feature.php"},
+        {"required": true, "file": "Objects/Subscription/Properties.php"},
+        {"required": true, "file": "Objects/Subscription.php"},
+        {"required": true, "file": "Objects/SubscriptionPlan.php"},
+        {"required": true, "file": "Objects/SubscriptionPromotion.php"},
+        {"required": true, "file": "Utilities/Converter.php"},
+        {"required": true, "file": "Utilities/Hashing.php"},
+        {"required": true, "file": "Utilities/Validate.php"}
     ],
     "files": [
         "configuration.ini",
