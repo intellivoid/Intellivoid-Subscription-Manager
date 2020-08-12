@@ -48,7 +48,9 @@
         {"required": true, "file": "Objects/SubscriptionPromotion.php"},
         {"required": true, "file": "Utilities/Converter.php"},
         {"required": true, "file": "Utilities/Hashing.php"},
-        {"required": true, "file": "Utilities/Validate.php"}
+        {"required": true, "file": "Utilities/Validate.php"},
+        {"required": true, "file": "IntellivoidSubscriptionManager.php"},
+        {"required": true, "file": "AutoConfig.php"}
     ],
     "files": [
         "configuration.ini",
