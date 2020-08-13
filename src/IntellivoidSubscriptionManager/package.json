@@ -13,7 +13,7 @@
             {"package": "net.intellivoid.ziproto", "version": "latest", "required": true}
         ],
         "configuration": {
-            "autoload_method": "static",
+            "autoload_method": "generated_spl",
             "main": null,
             "post_installation": [],
             "pre_installation": []
